@@ -4,7 +4,7 @@
 #
 *Temp*
 *Library*
-#*Build*
+*Build*
 *Logs*
 *UserSettings*
 /[Ll]ibrary/
@@ -61,7 +61,7 @@ ExportedObj/
 sysinfo.txt
 
 # Builds
-*.apk
+
 *.aab
 *.unitypackage
 *.app
