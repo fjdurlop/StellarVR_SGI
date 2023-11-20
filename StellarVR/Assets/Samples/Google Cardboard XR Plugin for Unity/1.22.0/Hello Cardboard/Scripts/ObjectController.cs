@@ -39,10 +39,10 @@ public class ObjectController : MonoBehaviour
     // set so that the objects are always within the room (which is about 5 meters
     // across).
     private const float _minObjectDistance = 0.1f;
-    private const float _maxObjectDistance = 20.0f;
+    private const float _maxObjectDistance = 1000.0f;
     private const float _minObjectHeight = 0.1f;
-    private const float _maxObjectHeight = 5.0f;
-    private Vector3 generalCamPosition = new Vector3(0.0f, -5.0f, 0.0f);
+    private const float _maxObjectHeight = 200.0f;
+    private Vector3 generalCamPosition = new Vector3(0.0f, 200.0f, 0.0f);
 
     private Renderer _myRenderer;
     private Vector3 _startingPosition;
@@ -50,6 +50,9 @@ public class ObjectController : MonoBehaviour
     private float timer_middle;
 
     private bool inSight;
+    private Transform current;
+    private Transform cam;
+    private bool activeTracking;
 
     private Material originalMaterial;
     private Material highlightMaterial;
@@ -78,10 +81,12 @@ public class ObjectController : MonoBehaviour
         _startingPosition = transform.parent.localPosition;
         _myRenderer = GetComponent<Renderer>();
         SetMaterial(false);
-        timer = 0.0f;
         inSight = false;
-
-        originalColor = _myRenderer.material.color;
+        current = this.transform;
+        cam = GameObject.Find("Player").transform;
+        cam.position = generalCamPosition;
+        activeTracking = false;
+        //originalColor = _myRenderer.material.color;
         newColor = originalColor;
         menu_activated = true;
 
@@ -95,12 +100,12 @@ public class ObjectController : MonoBehaviour
         timer += Time.deltaTime;
         if(inSight && timer > 2.0f)
         {
-            Debug.Log("Inside condition: " + timer);
             selectingButton();
+            Singleton.instance.setPlanet(current);
+            activeTracking = Singleton.instance.isSun();
             //movingCameraToObjective();
         }
-
-        
+        if (activeTracking) bringMenuPlayer();
     }
 
     /// <summary>
@@ -108,10 +113,9 @@ public class ObjectController : MonoBehaviour
     /// </summary>
     public void OnPointerEnter()
     {
-        Debug.Log("Enter");
         timer = 0.0f;
         inSight = true;
-        //SetMaterial(true);
+        SetMaterial(true);
     }
 
     /// <summary>
@@ -119,7 +123,6 @@ public class ObjectController : MonoBehaviour
     /// </summary>
     public void OnPointerExit()
     {
-        Debug.Log("EXITING");
         resetFocus();
         SetMaterial(false);
 
@@ -150,43 +153,13 @@ public class ObjectController : MonoBehaviour
             _myRenderer.material = gazedAt ? GazedAtMaterial : InactiveMaterial;
         }
     }
-
-    private void movingCameraToObjective()
-    {
-        Transform aux = this.transform;
-        Transform cam = GameObject.Find("Player").transform;
-        Vector3 destinyPosition = new Vector3(aux.transform.position.x - 1.5f * (1 + aux.parent.transform.localScale.x), aux.transform.position.y, aux.transform.position.z);
-        
-
-        if (aux.name == "Sun")
-        {   
-            if (cam.position != generalCamPosition)
-            { //Transformamos solo si no estamos ya en la camara general
-                cam.position = generalCamPosition;
-                cam.rotation = Quaternion.Euler(-90.0f, 180.0f, 90.0f);
-            }
-        }
-        else if (cam.position != destinyPosition)
-        {
-            if (cam.position == generalCamPosition)
-            {//Rotamos solo si procedemos de el sol
-                cam.rotation = Quaternion.Euler(0.0f, 90.0f, -180.0f);
-            }
-            else{
-                
-            }
-            cam.position = destinyPosition;
-        }
-        resetFocus();
-    }
-
     private void selectingButton()
     {
         // Get the name of the GameObject this script is attached to
         string objectName = gameObject.name;
         string type = "";
         // Log the object name to the console
-        Debug.Log("Object Name: " + objectName);
+        //Debug.Log("Object Name: " + objectName);
         GameObject selectedObject = GameObject.Find(objectName);
         Collider collider = selectedObject.GetComponent<Collider>();
 
@@ -407,7 +380,7 @@ public class ObjectController : MonoBehaviour
     public void movePlanet(GameObject selectedPlanet, string action, string direction){
         
         //selectedPlanet = GameObject.Find(planetsArray[counterPlanet]);
-        Debug.Log("movePlanet name: "+ selectedPlanet.name);
+        //Debug.Log("movePlanet name: "+ selectedPlanet.name);
 
         // sfera
         GameObject sphereMenu = GameObject.Find("Sphere_menu");
@@ -419,7 +392,7 @@ public class ObjectController : MonoBehaviour
 
         if(action =="rotate"){
             // Rotate the planet based on the direction
-            Debug.Log("movePlanet name: "+ selectedPlanet.name);
+            //Debug.Log("movePlanet name: "+ selectedPlanet.name);
 
             float rotationAmount = 1f; // Adjust this value as needed
             Vector3 rotationVector = Vector3.zero;
@@ -474,7 +447,7 @@ public class ObjectController : MonoBehaviour
     public void bringMenuPlayer(){
         //GameObject sphereMenu = GameObject.Find("Sphere_menu");
         //Transform cam = GameObject.Find("Player").transform;
-        Debug.Log("moving menu");
+        //Debug.Log("moving menu");
         //public Transform playerTransform;
         Transform playerTransform = GameObject.Find("Player").transform;
         GameObject menu = GameObject.Find("Menu_play");
