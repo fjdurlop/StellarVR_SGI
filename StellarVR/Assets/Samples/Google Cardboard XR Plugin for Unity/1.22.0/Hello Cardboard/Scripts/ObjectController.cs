@@ -100,12 +100,13 @@ public class ObjectController : MonoBehaviour
         timer += Time.deltaTime;
         if(inSight && timer > 2.0f)
         {
+            Singleton.instance.getReady();
             selectingButton();
             Singleton.instance.setPlanet(current);
             activeTracking = Singleton.instance.isSun();
             //movingCameraToObjective();
         }
-        if (activeTracking) bringMenuPlayer();
+        if (!activeTracking) bringMenuPlayer();
     }
 
     /// <summary>

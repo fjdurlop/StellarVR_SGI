@@ -6,10 +6,9 @@ using UnityEngine;
 public class Singleton : MonoBehaviour
 {
     public static Singleton instance;
-    private Vector3 Position;
     private Transform cam;
     private Transform planetObjective;
-    private bool active;
+    private bool active, ready;
     private Vector3 generalCamPosition = new Vector3(0.0f, 200.0f, 0.0f);
     private float Timer;
     // Start is called before the first frame update
@@ -23,15 +22,17 @@ public class Singleton : MonoBehaviour
     void Start()
     {
         active = false;
+        ready = false;
         cam = GameObject.Find("Player").transform;
-        Position = new Vector3(0.0f, 200.0f, 0.0f);
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (active) goToSpot();
-        else moving();
+        if (ready)
+        {
+            goToSpot();
+        }
     }
 
     internal void moving()
@@ -61,7 +62,7 @@ public class Singleton : MonoBehaviour
             }
         }
         Timer += Time.deltaTime;
-        if (Timer > 1.0f) active = true;
+        if(Timer > 1.75f) active = true;
     }
 
     internal void goToSpot()
@@ -82,14 +83,28 @@ public class Singleton : MonoBehaviour
 
     internal void setPlanet(Transform current)
     {
-        Timer = 0.0f;
-        active = false;
-        planetObjective = current;
+        if (planetObjective != null) {
+            Debug.Log("Names : " + current.name + " " + planetObjective.name + " " + (current.name != planetObjective.name));
+            if (current.name != planetObjective.name) active = false;
+            else active = true;
+            Timer = 0.0f;
+            planetObjective = current;
+        }
+        else
+        {
+            active = false;
+            Timer = 0.0f;
+            planetObjective = current;
+        }
     }
 
     internal bool isSun()
     {
-        Debug.Log("IsSun function: " + planetObjective.name + "   " + (planetObjective.name == "Sun_GEO"));
         return (planetObjective.name == "Sun_GEO");
+    }
+
+    internal void getReady()
+    {
+        ready = true;
     }
 }
